@@ -187,17 +187,9 @@ function Main({ children }) {
   return <main className="main">{children}</main>;
 }
 
-const API_KEY = "964fbde3";
-
 export default function App() {
-  const [movies, setMovies] = useState([]);
+  const [movies, setMovies] = useState(tempMovieData);
   const [watched, setWatched] = useState(tempWatchedData);
-
-  fetch(`http://www.omdbapi.com/?apikey=${API_KEY}&s=oppenheimer`)
-    .then((res) => res.json())
-    .then((data) => console.log(data.Search));
-
-  setWatched([]);
 
   return (
     <>
