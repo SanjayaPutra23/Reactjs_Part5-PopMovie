@@ -211,26 +211,16 @@ export default function App() {
   const [watched, setWatched] = useState(tempWatchedData);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [query, setQuery] = useState("");
-
-  const tempQuery = "hitler";
-
-  useEffect(() => {
-    console.log(1);
-  }, []);
-
-  useEffect(() => {
-    console.log(2);
-  });
-
-  console.log(3);
+  const [query, setQuery] = useState("hitler");
 
   useEffect(() => {
     async function fetchMovie() {
       try {
         setIsLoading(true);
+        setError("");
+
         const res = await fetch(
-          `http://www.omdbapi.com/?s=${tempQuery}&apikey=${API_KEY}`
+          `http://www.omdbapi.com/?s=${query}&apikey=${API_KEY}`
         );
 
         if (!res.ok) throw new Error("Something went wrong");
@@ -247,8 +237,14 @@ export default function App() {
       }
     }
 
+    if (query.length < 3) {
+      setMovies([]);
+      setError("");
+      return;
+    }
+
     fetchMovie();
-  }, []);
+  }, [query]);
 
   return (
     <>
