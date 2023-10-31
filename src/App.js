@@ -83,9 +83,9 @@ function NavBar({ children }) {
   return <nav className="nav-bar">{children}</nav>;
 }
 
-function MovieItem({ movie }) {
+function MovieItem({ movie, onSelectMovieId }) {
   return (
-    <li key={movie.imdbID}>
+    <li key={movie.imdbID} onClick={() => onSelectMovieId(movie.imdbID)}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
       <div>
@@ -98,11 +98,15 @@ function MovieItem({ movie }) {
   );
 }
 
-function MovieList({ movies }) {
+function MovieList({ movies, onSelectMovieId }) {
   return (
-    <ul className="list">
+    <ul className="list list-movies">
       {movies?.map((movie, index) => (
-        <MovieItem key={index} movie={movie} />
+        <MovieItem
+          key={index}
+          movie={movie}
+          onSelectMovieId={onSelectMovieId}
+        />
       ))}
     </ul>
   );
@@ -212,6 +216,11 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("hitler");
+  const [selectedMovieId, setSelectedMovieId] = useState(null);
+
+  function handleSelectMovieId(id) {
+    setSelectedMovieId(id);
+  }
 
   useEffect(() => {
     async function fetchMovie() {
@@ -257,7 +266,9 @@ export default function App() {
         <BoxMovies>
           {isLoading && <Loader />}
           {error && <ErrorMessage message={error} />}
-          {!isLoading && !error && <MovieList movies={movies} />}
+          {!isLoading && !error && (
+            <MovieList movies={movies} onSelectMovieId={handleSelectMovieId} />
+          )}
         </BoxMovies>
         <BoxMovies>
           <WatchedSummary watched={watched} />
