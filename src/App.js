@@ -131,7 +131,7 @@ function WatchedSummary({ watched }) {
         </p>
         <p>
           <span>🌟</span>
-          <span>{avgUserRating}</span>
+          <span>{avgUserRating.toFixed(1)}</span>
         </p>
         <p>
           <span>⏳</span>
@@ -142,7 +142,7 @@ function WatchedSummary({ watched }) {
   );
 }
 
-function WatchedItem({ movie }) {
+function WatchedItem({ movie, onDeleteWatched }) {
   return (
     <li key={movie.imdbID}>
       <img src={movie.poster} alt={`${movie.title} poster`} />
@@ -160,16 +160,26 @@ function WatchedItem({ movie }) {
           <span>⏳</span>
           <span>{movie.runtime} min</span>
         </p>
+        <button
+          className="btn-delete"
+          onClick={() => onDeleteWatched(movie.imdbID)}
+        >
+          x
+        </button>
       </div>
     </li>
   );
 }
 
-function WatchedList({ watched }) {
+function WatchedList({ watched, onDeleteWatched }) {
   return (
     <ul className="list">
       {watched.map((movie, index) => (
-        <WatchedItem key={index} movie={movie} />
+        <WatchedItem
+          key={index}
+          movie={movie}
+          onDeleteWatched={onDeleteWatched}
+        />
       ))}
     </ul>
   );
@@ -187,9 +197,15 @@ function BoxMovies({ children }) {
   );
 }
 
-function MovieDetails({ selectedId, onCloseMovie, onAddWatched }) {
+function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const [movie, setMovie] = useState({});
+  const [userRating, setUserRating] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+
+  const isWatched = watched.some((movie) => movie.imdbID === selectedId);
+  const userRatingWatched = watched.find(
+    (movie) => movie.imdbID === selectedId
+  )?.userRating;
 
   const {
     Title: title,
@@ -212,6 +228,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched }) {
       poster,
       imdbRating: Number(imdbRating),
       runtime: Number(runtime.split(" ").at(0)),
+      userRating: Number(userRating),
     };
     onAddWatched(newWatchedMovie);
     onCloseMovie();
@@ -266,10 +283,26 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched }) {
             <p>Starring: {actors}</p>
             <p>Directed by: {director}</p>
             <div className="rating">
-              <StarRating max={10} size={24} color="#fcc419" />
-              <button className="btn-add" onClick={handleAddWatched}>
-                + Add to Watched
-              </button>
+              {!isWatched ? (
+                <>
+                  <StarRating
+                    max={10}
+                    size={24}
+                    color="#fcc419"
+                    onSetRating={setUserRating}
+                  />
+                  {userRating > 0 && (
+                    <button className="btn-add" onClick={handleAddWatched}>
+                      + Add to Watched
+                    </button>
+                  )}
+                </>
+              ) : (
+                <p>
+                  you have watched this movie with a rating of{" "}
+                  {userRatingWatched} / 10
+                </p>
+              )}
             </div>
           </section>
         </>
@@ -316,6 +349,10 @@ export default function App() {
 
   function handleAddWatched(movie) {
     setWatched((watched) => [...watched, movie]);
+  }
+
+  function handleDeleteWatched(id) {
+    setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
 
   function handleCloseMovie() {
@@ -376,11 +413,15 @@ export default function App() {
               selectedId={selectedMovieId}
               onCloseMovie={handleCloseMovie}
               onAddWatched={handleAddWatched}
+              watched={watched}
             />
           ) : (
             <>
               <WatchedSummary watched={watched} />
-              <WatchedList watched={watched} />
+              <WatchedList
+                watched={watched}
+                onDeleteWatched={handleDeleteWatched}
+              />
             </>
           )}
         </BoxMovies>
