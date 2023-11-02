@@ -390,6 +390,7 @@ export default function App() {
         setMovies(data.Search);
         setError("");
       } catch (err) {
+        if (err.name === "AbortError") return;
         setError(err.message);
       } finally {
         setIsLoading(false);
